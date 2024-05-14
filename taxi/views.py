@@ -113,15 +113,14 @@ class DriverDeleteView(LoginRequiredMixin, generic.DeleteView):
     success_url = reverse_lazy("taxi:driver-list")
 
 
-class AssignDriverToCarView(LoginRequiredMixin, generic.View):
-    def get(self, request, *args, **kwargs):
+class ManageDriverForCarView(LoginRequiredMixin, generic.View):
+    def post(self, request, *args, **kwargs):
         car = get_object_or_404(Car, pk=kwargs["pk"])
-        car.drivers.add(request.user)
-        return redirect(reverse_lazy("taxi:car-detail", kwargs={"pk": car.pk}))
+        action = request.POST.get("action")
 
+        if action == "add":
+            car.drivers.add(request.user)
+        elif action == "remove":
+            car.drivers.remove(request.user)
 
-class RemoveDriverFromCarView(LoginRequiredMixin, generic.View):
-    def get(self, request, *args, **kwargs):
-        car = get_object_or_404(Car, pk=kwargs["pk"])
-        car.drivers.remove(request.user)
         return redirect(reverse_lazy("taxi:car-detail", kwargs={"pk": car.pk}))

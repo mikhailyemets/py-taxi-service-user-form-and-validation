@@ -14,15 +14,6 @@
   <p>Manufacturer: ({{ car.manufacturer.name }}, {{ car.manufacturer.country }})</p>
   <h1>
     Drivers
-    {% if is_driver %}
-    <a style="margin-left: 20px" href="{% url 'taxi:remove-driver-from-car' pk=car.id %}" class="btn btn-primary">
-      Delete me from this car
-    </a>
-    {% else %}
-    <a style="margin-left: 20px" href="{% url 'taxi:assign-driver-to-car' pk=car.id %}" class="btn btn-primary">
-        Assign me to this car
-    </a>
-    {% endif %}  
   </h1>
   <hr>
   <ul>
@@ -30,4 +21,39 @@
       <li>{{ driver.username }} ({{ driver.first_name }} {{ driver.last_name }})</li>
     {% endfor %}
   </ul>
+
+  {% if request.user not in car.drivers.all %}
+    <form method="post" action="{% url 'taxi:manage-driver' pk=car.pk %}">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="add">
+      <button type="submit" class="btn btn-primary" id="addDriverBtn">Add Me as Driver</button>
+    </form>
+  {% else %}
+    <form method="post" action="{% url 'taxi:manage-driver' pk=car.pk %}">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="remove">
+      <button type="submit" class="btn btn-primary" id="removeDriverBtn">Remove Me as Driver</button>
+    </form>
+  {% endif %}
+
+  
+  {# I hope it's not gonna be a problem that i find js script for buttons ;) #}
+  <script>
+    const addDriverBtn = document.getElementById('addDriverBtn');
+    const removeDriverBtn = document.getElementById('removeDriverBtn');
+
+    if (addDriverBtn) {
+      addDriverBtn.addEventListener('click', function() {
+        addDriverBtn.style.display = 'none';
+        removeDriverBtn.style.display = 'inline-block';
+      });
+    }
+
+    if (removeDriverBtn) {
+      removeDriverBtn.addEventListener('click', function() {
+        addDriverBtn.style.display = 'inline-block';
+        removeDriverBtn.style.display = 'none';
+      });
+    }
+  </script>
 {% endblock %}
